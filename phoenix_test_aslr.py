@@ -381,30 +381,30 @@ if __name__ == "__main__":
     limitsample = 10
     glosstype = 1
     glossp = 40
-    drive = "/content/dataset/RWTHPHOENIXWeather2014"
+    drive = "/tmp/esrsts/dataset/RWTHPHOENIXWeather2014"
 
     cf = load_clf(drive, glosstype, glossp, 'f', limitsample)
     cb = load_clf(drive, glosstype, glossp, 'b', limitsample)
 
     # n-gram
     n = 3
-    with open(f"/content/dataset/RWTHPHOENIXWeather2014/ngram_files/phoenix_{n}grams", "rb") as pf:
+    with open(f"/tmp/esrsts/dataset/RWTHPHOENIXWeather2014/ngram_files/phoenix_{n}grams", "rb") as pf:
         ngrams = pickle.load(pf)
     pf.close()
     # label encoder objects
-    with open(f"/content/dataset/RWTHPHOENIXWeather2014/encoded_label/label_le_obj{limitsample}", "rb") as pf:
+    with open(f"/tmp/esrsts/dataset/RWTHPHOENIXWeather2014/encoded_label/label_le_obj{limitsample}", "rb") as pf:
         le = pickle.load(pf)
     pf.close()
-    with open(f"/content/dataset/RWTHPHOENIXWeather2014/encoded_label/label_sample{limitsample}", "rb") as pf:
+    with open(f"/tmp/esrsts/dataset/RWTHPHOENIXWeather2014/encoded_label/label_sample{limitsample}", "rb") as pf:
         lbl = pickle.load(pf)
     pf.close()
-    with open(f"/content/dataset/RWTHPHOENIXWeather2014/encoded_label/label_weight{limitsample}", "rb") as pf:
+    with open(f"/tmp/esrsts/dataset/RWTHPHOENIXWeather2014/encoded_label/label_weight{limitsample}", "rb") as pf:
         cw = pickle.load(pf)
     pf.close()
     # segment objects
     sp = 50
     st = 1
-    with open(f"/content/dataset/RWTHPHOENIXWeather2014/segment_files/alldata_test_{sp}p_{st}", "rb") as pf:
+    with open(f"/tmp/esrsts/dataset/RWTHPHOENIXWeather2014/segment_files/alldata_test_{sp}p_{st}", "rb") as pf:
         segments = pickle.load(pf)
     pf.close()
 
@@ -421,8 +421,8 @@ if __name__ == "__main__":
         annotations = pf.readlines()
     pf.close()
 
-    teststart = 1
-    teststop = 11
+    teststart = 0
+    teststop = 2
     datanamespart = datanames[teststart:teststop]
 
     finalresults = []
@@ -443,15 +443,20 @@ if __name__ == "__main__":
         allmcm = load_allmcm_video(datadir, dataname, glosstype, glossp, blankframe)
         glossresult1 = []
 
-        glossresult1 = find_path(dataori, dataname, glossresult1, ngrams, peaks, cw, allmcm, cf, cb)
+        try:
+            glossresult1 = find_path(dataori, dataname, glossresult1, ngrams, peaks, cw, allmcm, cf, cb)
+        except BaseException as err:
+            print(err)
+
         listgloss = [g[0] for g in glossresult1]
 
         a = annotations[teststart + dataname_i]
-        print(a)
+        gt = str(a).split("|")[-1]
+        print(gt)
         print(listgloss)
 
-        finalresults.append((dataname, listgloss))
+        finalresults.append((dataname, gt, listgloss))
 
-    with open('finalresults', 'wb') as pf:
-        pickle.dump(finalresults, pf)
-    pf.close()
+        with open(f"./finalresults/{dataname}", "wb") as pf:
+            pickle.dump(finalresults, pf)
+        pf.close()
