@@ -1,3 +1,3 @@
 # signpy-ml
 
-This repository saves ASLR system testing process.
+This repository contains some of the codes from my PhD study.
